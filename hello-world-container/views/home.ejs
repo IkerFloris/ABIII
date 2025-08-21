@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome - Elephant Migration Patterns</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-container">
+            <h1>Welcome to Elephant Migration Patterns</h1>
+            
+            <% if (isAuthenticated) { %>
+                <div class="user-info">
+                    <p>Welcome, <%= userInfo.username || userInfo.email %></p>
+                </div>
+                <a href="/elephants" class="button">View Elephant Migration Information</a>
+                <a href="/logout" class="button logout">Logout</a>
+            <% } else { %>
+                <div class="auth-message">
+                    <p>Please log in to view elephant migration information</p>
+                </div>
+                <a href="/login" class="button">Login</a>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

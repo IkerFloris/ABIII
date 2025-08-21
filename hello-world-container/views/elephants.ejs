@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elephant Migration Patterns</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <% if (isAuthenticated) { %>
+                <p>Welcome, <%= userInfo.username || userInfo.email %></p>
+                <a href="/logout">Logout</a>
+            <% } %>
+        </nav>
+
+        <div class="content-section">
+            <h1>Elephant Migration: Nature's Great Journey</h1>
+            
+            <div class="image-container">
+                <img src="https://d1unc686z3poj5.cloudfront.net/elephants.jpeg" 
+                     alt="Elephants migrating across African savanna"
+                     width="600">
+            </div>
+
+            <!-- Rest of your existing content with the same structure -->
+        </div>
+    </div>
+</body>
+</html>
