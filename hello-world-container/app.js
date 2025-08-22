@@ -3,7 +3,7 @@ const session = require('express-session');
 const { Issuer, generators } = require('openid-client');
 const path = require('path');
 const app = express();
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 
 // Error handling
 process.on('uncaughtException', (err) => {
@@ -20,9 +20,9 @@ process.on('unhandledRejection', (err) => {
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session middleware with secure settings
+// Session middleware
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'some-secret',
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -33,16 +33,26 @@ app.use(session({
 }));
 
 let client;
-// Initialize OpenID Client with error handling
+
+// Initialize OpenID Client
 async function initializeClient() {
     try {
-        const issuer = await Issuer.discover('https://cognito-idp.eu-north-1.amazonaws.com/eu-north-1_UTMwKW3gu');
+        // Replace with your Cognito User Pool details
+        const cognitoRegion = process.env.COGNITO_REGION || 'us-east-1';
+        const userPoolId = process.env.COGNITO_USER_POOL_ID || 'your-user-pool-id';
+        const clientId = process.env.COGNITO_CLIENT_ID || 'your-client-id';
+        const clientSecret = process.env.COGNITO_CLIENT_SECRET || 'your-client-secret';
+        const redirectUri = process.env.REDIRECT_URI || 'http://localhost:3000/callback';
+        
+        const issuer = await Issuer.discover(`https://cognito-idp.${cognitoRegion}.amazonaws.com/${userPoolId}`);
+        
         client = new issuer.Client({
-            client_id: 'ur6bklnund2slc43r9cieqvvm',
-            client_secret: process.env.COGNITO_CLIENT_SECRET || '<client secret>',
-            redirect_uris: ['https://Prod-Hello-World-1565511133.eu-north-1.elb.amazonaws.com'],
+            client_id: clientId,
+            client_secret: clientSecret,
+            redirect_uris: [redirectUri],
             response_types: ['code']
         });
+        
         console.log('OpenID Client initialized successfully');
     } catch (error) {
         console.error('Failed to initialize OpenID Client:', error);
@@ -64,21 +74,25 @@ const checkAuth = (req, res, next) => {
 app.get('/', checkAuth, (req, res) => {
     res.render('home', {
         isAuthenticated: req.isAuthenticated,
-        userInfo: req.session.userInfo
+        userInfo: req.session.userInfo || null
     });
 });
 
-app.get('/elephants', checkAuth, (req, res) => {
+app.get('/swans', checkAuth, (req, res) => {
     if (!req.isAuthenticated) {
         return res.redirect('/login');
     }
-    res.render('elephants', {
+    res.render('swans', {
         isAuthenticated: req.isAuthenticated,
         userInfo: req.session.userInfo
     });
 });
 
 app.get('/login', (req, res) => {
+    if (!client) {
+        return res.status(500).send('Authentication service not available');
+    }
+    
     const nonce = generators.nonce();
     const state = generators.state();
 
@@ -86,7 +100,7 @@ app.get('/login', (req, res) => {
     req.session.state = state;
 
     const authUrl = client.authorizationUrl({
-        scope: 'phone openid email',
+        scope: 'openid email profile',
         state: state,
         nonce: nonce,
     });
@@ -94,11 +108,17 @@ app.get('/login', (req, res) => {
     res.redirect(authUrl);
 });
 
-app.get(getPathFromURL('https://Prod-Hello-World-1565511133.eu-north-1.elb.amazonaws.com'), async (req, res) => {
+app.get('/callback', async (req, res) => {
     try {
+        if (!client) {
+            throw new Error('Authentication service not available');
+        }
+        
         const params = client.callbackParams(req);
+        const redirectUri = process.env.REDIRECT_URI || 'http://localhost:3000/callback';
+        
         const tokenSet = await client.callback(
-            'https://Prod-Hello-World-1565511133.eu-north-1.elb.amazonaws.com',
+            redirectUri,
             params,
             {
                 nonce: req.session.nonce,
@@ -109,42 +129,41 @@ app.get(getPathFromURL('https://Prod-Hello-World-1565511133.eu-north-1.elb.amazo
         const userInfo = await client.userinfo(tokenSet.access_token);
         req.session.userInfo = userInfo;
 
-        res.redirect('/elephants');
+        res.redirect('/swans');
     } catch (err) {
         console.error('Callback error:', err);
-        res.redirect('/');
+        res.redirect('/?error=auth_failed');
     }
 });
 
 app.get('/logout', (req, res) => {
-    req.session.destroy();
-    const logoutUrl = `https://eu-north-1utmwkw3gu.auth.eu-north-1.amazoncognito.com/logout?client_id=ur6bklnund2slc43r9cieqvvm&logout_uri=https://Prod-Hello-World-1565511133.eu-north-1.elb.amazonaws.com`;
-    res.redirect(logoutUrl);
+    const logoutUri = process.env.LOGOUT_URI || 'http://localhost:3000';
+    const cognitoDomain = process.env.COGNITO_DOMAIN || 'your-cognito-domain';
+    const clientId = process.env.COGNITO_CLIENT_ID || 'your-client-id';
+    
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Session destruction error:', err);
+        }
+        const logoutUrl = `https://${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${logoutUri}`;
+        res.redirect(logoutUrl);
+    });
 });
 
-app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port}`);
-});
-
-function getPathFromURL(urlString) {
-    try {
-        const url = new URL(urlString);
-        return url.pathname;
-    } catch (error) {
-        console.error('Invalid URL:', error);
-        return null;
-    }
-}
-
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).render('error', {
-        message: 'Something broke!',
+        message: 'Something went wrong!',
         error: process.env.NODE_ENV === 'development' ? err : {}
     });
 });
 
 // Graceful shutdown
+const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`Swan Migration App listening on port ${port}`);
+});
+
 function shutdown() {
     console.log('Received shutdown signal');
     server.close(() => {
@@ -152,7 +171,6 @@ function shutdown() {
         process.exit(0);
     });
 
-    // Force close after 10s
     setTimeout(() => {
         console.error('Could not close connections in time, forcefully shutting down');
         process.exit(1);
@@ -162,12 +180,7 @@ function shutdown() {
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
-// Initialize server
-const server = app.listen(port, '0.0.0.0', () => {
-    console.log(`Server running on port ${port}`);
-});
-
-// Initialize OpenID Client
+// Initialize the client
 initializeClient().catch(error => {
     console.error('Failed to start application:', error);
     process.exit(1);

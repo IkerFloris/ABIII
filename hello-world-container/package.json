@@ -1,19 +1,22 @@
 {
-  "name": "node",
+  "name": "swan-migration-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Node.js app showing swan migration patterns with AWS Cognito authentication",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "NODE_ENV=development nodemon app.js"
+    "dev": "nodemon app.js"
   },
-  "author": "",
-  "license": "ISC",
+  "keywords": ["node", "express", "cognito", "swans", "migration"],
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
-    "ejs": "^3.1.10",
     "express": "^4.21.1",
+    "ejs": "^3.1.10",
     "express-session": "^1.18.1",
     "openid-client": "^5.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
-
 }

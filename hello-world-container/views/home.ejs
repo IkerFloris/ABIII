@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Welcome - Elephant Migration Patterns</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swan Migration - Home</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="container">
         <div class="auth-container">
-            <h1>Welcome to Elephant Migration Patterns</h1>
+            <h1>🦢 Swan Migration Patterns</h1>
+            <p class="subtitle">Discover the incredible journeys of swans across continents</p>
             
             <% if (isAuthenticated) { %>
                 <div class="user-info">
-                    <p>Welcome, <%= userInfo.username || userInfo.email %></p>
+                    <p>Welcome back, <%= userInfo.email || userInfo.username %>!</p>
                 </div>
-                <a href="/elephants" class="button">View Elephant Migration Information</a>
-                <a href="/logout" class="button logout">Logout</a>
+                <a href="/swans" class="button primary">Explore Swan Migration</a>
+                <a href="/logout" class="button secondary">Logout</a>
             <% } else { %>
                 <div class="auth-message">
-                    <p>Please log in to view elephant migration information</p>
+                    <p>Sign in to discover the fascinating world of swan migration patterns</p>
                 </div>
-                <a href="/login" class="button">Login</a>
+                <a href="/login" class="button primary">Sign In</a>
             <% } %>
         </div>
     </div>

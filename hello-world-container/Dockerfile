@@ -1,28 +1,32 @@
 FROM node:20-alpine
 
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy package files first to leverage Docker cache
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --only=production
 
-# Copy rest of the application
+# Copy application code
 COPY . .
 
-# Create necessary directories and set permissions
-RUN mkdir -p /usr/src/app/views
-RUN mkdir -p /usr/src/app/public/css
+# Create necessary directories
+RUN mkdir -p views public/css
+
+# Set proper permissions
 RUN chown -R node:node /usr/src/app
 
 # Switch to non-root user
 USER node
 
+# Expose port
 EXPOSE 3000
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:3000 || exit 1
 
+# Start the application
 CMD ["npm", "start"]
