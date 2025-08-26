@@ -3,7 +3,7 @@ Resources:
   - TargetService:
       Type: AWS::ECS::Service
       Properties:
-        TaskDefinition: "<TASK_DEFINITION>"
+        TaskDefinition: swan-migration-cluster-dev
         LoadBalancerInfo:
           ContainerName: "swan-migration-container"
           ContainerPort: 3000
