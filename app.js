@@ -38,11 +38,11 @@ let client;
 async function initializeClient() {
     try {
         // Replace with your Cognito User Pool details
-        const cognitoRegion = process.env.COGNITO_REGION || 'us-east-1';
-        const userPoolId = process.env.COGNITO_USER_POOL_ID || 'your-user-pool-id';
-        const clientId = process.env.COGNITO_CLIENT_ID || 'your-client-id';
-        const clientSecret = process.env.COGNITO_CLIENT_SECRET || 'your-client-secret';
-        const redirectUri = process.env.REDIRECT_URI || 'http://localhost:3000/callback';
+        const cognitoRegion = process.env.COGNITO_REGION || 'eu-north-1';
+        const userPoolId = process.env.COGNITO_USER_POOL_ID || 'eu-north-1_UTMwKW3gu';
+        const clientId = process.env.COGNITO_CLIENT_ID || 'ur6bklnund2slc43r9cieqvvm';
+        const clientSecret = process.env.COGNITO_CLIENT_SECRET || 'fokl9b0euuo0rnbs70ut6od4ql7g36c701121pdfhslpntlaovn';
+        const redirectUri = process.env.REDIRECT_URI || ' http://Hello-world-load-balancer-1675728879.eu-north-1.elb.amazonaws.com/callback';
         
         const issuer = await Issuer.discover(`https://cognito-idp.${cognitoRegion}.amazonaws.com/${userPoolId}`);
         
