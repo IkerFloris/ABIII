@@ -26,10 +26,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+    secure: process.env.NODE_ENV === 'production' && process.env.TRUST_PROXY === 'true',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+    }   
 }));
 
 let client;
@@ -110,12 +110,19 @@ app.get('/login', (req, res) => {
 
 app.get('/callback', async (req, res) => {
     try {
+        console.log('Callback received:', {
+            params: req.query,
+            sessionNonce: req.session.nonce,
+            sessionState: req.session.state,
+            hasClient: !!client
+        });
+        
         if (!client) {
             throw new Error('Authentication service not available');
         }
         
         const params = client.callbackParams(req);
-        const redirectUri = process.env.REDIRECT_URI || 'http://localhost:3000/callback';
+        const redirectUri = process.env.REDIRECT_URI;
         
         const tokenSet = await client.callback(
             redirectUri,
@@ -131,7 +138,15 @@ app.get('/callback', async (req, res) => {
 
         res.redirect('/swans');
     } catch (err) {
-        console.error('Callback error:', err);
+        console.error('Callback error details:', {
+            error: err.message,
+            stack: err.stack,
+            params: req.query,
+            sessionData: {
+                nonce: req.session.nonce,
+                state: req.session.state
+            }
+        });
         res.redirect('/?error=auth_failed');
     }
 });
