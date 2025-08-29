@@ -20,6 +20,7 @@ process.on('unhandledRejection', (err) => {
 app.set('view engine', 'ejs');
 // Trust the load balancer
 app.set('trust proxy', 1);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session middleware
