@@ -18,6 +18,8 @@ process.on('unhandledRejection', (err) => {
 
 // Configure view engine and static files
 app.set('view engine', 'ejs');
+// Trust the load balancer
+app.set('trust proxy', 1);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session middleware
@@ -26,10 +28,11 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-    secure: process.env.NODE_ENV === 'production' && process.env.TRUST_PROXY === 'true',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-    }   
+        secure: false, // Disable secure cookies behind load balancer
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'lax' // Better compatibility
+    }
 }));
 
 let client;
