@@ -4,6 +4,65 @@ const { Issuer, generators } = require('openid-client');
 const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
+// Add at the top of your file
+const axios = require('axios');
+
+// Function to get image with fallback logic
+async function getSwanImageUrl() {
+  const devUrl = 'http://image-service.swan-dev.local/assets/flying-swans.jpg';
+  const prodUrl = 'http://image-service.swan-prod.local/assets/flying-swans.jpg';
+  const fallbackUrl = 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80';
+  
+  // Try DEV first
+  try {
+    const devResponse = await axios.head(devUrl, { 
+      timeout: 3000,
+      validateStatus: (status) => status === 200 
+    });
+    console.log('Using DEV image service');
+    return devUrl;
+  } catch (error) {
+    console.log('DEV image service unavailable:', error.message);
+  }
+  
+  // Try PROD as fallback
+  try {
+    const prodResponse = await axios.head(prodUrl, { 
+      timeout: 3000,
+      validateStatus: (status) => status === 200 
+    });
+    console.log('Using PROD image service as fallback');
+    return prodUrl;
+  } catch (error) {
+    console.log('PROD image service also unavailable:', error.message);
+  }
+  
+  // Return original Unsplash URL as final fallback
+  console.log('Using external Unsplash image as final fallback');
+  return fallbackUrl;
+}
+
+// Modify your route (replace with your actual route)
+app.get('/swans', async (req, res) => {
+  try {
+    // Get the swan image URL with fallback logic
+    const swanImageUrl = await getSwanImageUrl();
+    
+    res.render('swans', {
+      userInfo: req.user, // or however you pass user info
+      swanImageUrl: swanImageUrl,
+      imageSource: swanImageUrl.includes('swan-dev.local') ? 'DEV' : 
+                   swanImageUrl.includes('swan-prod.local') ? 'PROD' : 'EXTERNAL'
+    });
+  } catch (error) {
+    console.error('Error rendering swans page:', error);
+    res.render('swans', {
+      userInfo: req.user,
+      swanImageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80',
+      imageSource: 'EXTERNAL'
+    });
+  }
+});
 
 // Error handling
 process.on('uncaughtException', (err) => {
