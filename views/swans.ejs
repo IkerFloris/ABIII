@@ -21,9 +21,32 @@
         <div class="content-section">
             <h1>The Great Swan Migration: A Continental Journey!</h1>
             
+            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swan Migration Patterns</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="top-nav">
+            <div class="nav-content">
+                <h2>🦢 Swan Migration</h2>
+                <div class="nav-links">
+                    <span>Welcome, <%= userInfo.email || userInfo.username %></span>
+                    <a href="/logout" class="button small">Logout</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="content-section">
+            <h1>The Great Swan Migration: A Continental Journey!</h1>
+            
             <div class="image-container">
-                <img id="swan-hero-image" 
-                     src="<%= imageUrls ? imageUrls.fallback : 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80' %>" 
+                <img id="swan-hero-image"
+                     src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80" 
                      alt="Swans migrating in V-formation across the sky"
                      class="hero-image">
                 <p class="image-caption">

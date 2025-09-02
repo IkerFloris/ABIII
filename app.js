@@ -5,29 +5,6 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-
-// Modify your route (replace with your actual route)
-// Simple, robust approach - modify your route handler
-app.get('/swans', (req, res) => {
-  // Set image URLs in order of preference
-  const imageUrls = {
-    dev: 'http://image-service.swan-dev.local/assets/flying-swans.jpg',
-    prod: 'http://image-service.swan-prod.local/assets/flying-swans.jpg',
-    fallback: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80'
-  };
-  
-  try {
-    res.render('swans', {
-      userInfo: req.user || { email: 'Guest' }, // Make sure userInfo exists
-      imageUrls: imageUrls,
-      // For now, just pass all URLs to the frontend
-    });
-  } catch (error) {
-    console.error('Error rendering swans page:', error);
-    res.status(500).send('Server Error');
-  }
-});
-
 // Error handling
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
@@ -70,16 +47,16 @@ async function initializeClient() {
         const clientId = process.env.COGNITO_CLIENT_ID || 'ur6bklnund2slc43r9cieqvvm';
         const clientSecret = process.env.COGNITO_CLIENT_SECRET || 'fokl9b0euuo0rnbs70ut6od4ql7g36c701121pdfhslpntlaovn';
         const redirectUri = process.env.REDIRECT_URI || ' http://Hello-world-load-balancer-1675728879.eu-north-1.elb.amazonaws.com/callback';
-        
+
         const issuer = await Issuer.discover(`https://cognito-idp.${cognitoRegion}.amazonaws.com/${userPoolId}`);
-        
+
         client = new issuer.Client({
             client_id: clientId,
             client_secret: clientSecret,
             redirect_uris: [redirectUri],
             response_types: ['code']
         });
-        
+
         console.log('OpenID Client initialized successfully');
     } catch (error) {
         console.error('Failed to initialize OpenID Client:', error);
@@ -119,7 +96,7 @@ app.get('/login', (req, res) => {
     if (!client) {
         return res.status(500).send('Authentication service not available');
     }
-    
+
     const nonce = generators.nonce();
     const state = generators.state();
 
@@ -143,14 +120,14 @@ app.get('/callback', async (req, res) => {
             sessionState: req.session.state,
             hasClient: !!client
         });
-        
+
         if (!client) {
             throw new Error('Authentication service not available');
         }
-        
+
         const params = client.callbackParams(req);
         const redirectUri = process.env.REDIRECT_URI;
-        
+
         const tokenSet = await client.callback(
             redirectUri,
             params,
@@ -182,7 +159,7 @@ app.get('/logout', (req, res) => {
     const logoutUri = process.env.LOGOUT_URI || 'http://localhost:3000';
     const cognitoDomain = process.env.COGNITO_DOMAIN || 'your-cognito-domain';
     const clientId = process.env.COGNITO_CLIENT_ID || 'your-client-id';
-    
+
     req.session.destroy((err) => {
         if (err) {
             console.error('Session destruction error:', err);
