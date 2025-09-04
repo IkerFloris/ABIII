@@ -30,14 +30,11 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        name: 'connection.sid',
-        secure: true, // Change to true if using HTTPS
+        secure: false, // Disable secure cookies behind load balancer
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: 'lax',
-        domain: '.elb.amazonaws.com' // Add your load balancer domain
-    },
-    proxy: true // Add this when behind a proxy/load balancer
+        sameSite: 'lax' // Better compatibility
+    }
 }));
 
 let client;
