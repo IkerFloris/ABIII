@@ -30,6 +30,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
+        name: 'connection.sid',
         secure: true, // Change to true if using HTTPS
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
