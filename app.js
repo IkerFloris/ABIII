@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
+
 // Error handling
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
@@ -29,11 +30,13 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // Disable secure cookies behind load balancer
+        secure: true, // Change to true if using HTTPS
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: 'lax' // Better compatibility
-    }
+        sameSite: 'lax',
+        domain: '.elb.amazonaws.com' // Add your load balancer domain
+    },
+    proxy: true // Add this when behind a proxy/load balancer
 }));
 
 let client;
