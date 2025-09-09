@@ -137,7 +137,6 @@
                     // Try PROD second
                     await tryLoadImage('http://image-service.swan-prod.local/assets/flying-swans.jpg', '📡 PROD Service', '#FF9800');
                 } catch {
-                    // Keep the original external image (already loaded)
                     console.log('Both services failed, keeping external image');
                 }
             }
