@@ -23,7 +23,7 @@
             
             <div class="image-container">
                 <img id="swan-hero-image"
-                     src="/assets/flying-swans.jpg"
+                     src="/assets/loading.jpg"  <!-- or any placeholder image -->
                      alt="Swans migrating in V-formation across the sky"
                      class="hero-image">
                 <p class="image-caption">
@@ -129,21 +129,44 @@
         }
 
         async function loadBestImage() {
+            const imageEndpoint = '/assets/flying-swans.jpg';
+            
             try {
-                // Try DEV first
-                await tryLoadImage('http://image-service.swan-dev.local/assets/flying-swans.jpg', '📡 DEV Service', '#2196F3');
-            } catch {
-                try {
-                    // Try PROD second
-                    await tryLoadImage('http://image-service.swan-prod.local/assets/flying-swans.jpg', '📡 PROD Service', '#FF9800');
-                } catch {
-                    console.log('Both services failed, keeping external image');
-                }
+                console.log('Attempting to connect to PROD service...');
+                await tryLoadImage(
+                    `http://image-service.swan-prod.local${imageEndpoint}`, 
+                    '📡 PROD Service', 
+                    '#FF9800'
+                );
+                console.log('Successfully connected to PROD service');
+                return;
+            } catch (error) {
+                console.log('PROD service failed:', error);
             }
+        
+            try {
+                console.log('Attempting to connect to DEV service...');
+                await tryLoadImage(
+                    `http://image-service.swan-dev.local${imageEndpoint}`, 
+                    '📡 DEV Service', 
+                    '#2196F3'
+                );
+                console.log('Successfully connected to DEV service');
+                return;
+            } catch (error) {
+                console.log('DEV service failed:', error);
+            }
+        
+            // If both services fail, load from local assets as last resort
+            console.log('Both services failed, using local asset');
+            document.getElementById('swan-hero-image').src = imageEndpoint;
+            document.getElementById('image-source').innerHTML = 
+                '<span style="color: #9E9E9E; font-size: 0.8em;"> (Local Asset)</span>';
         }
-
-        // Start trying to load better images after page loads
+        
+        // Start loading immediately when DOM is ready
         document.addEventListener('DOMContentLoaded', loadBestImage);
+
     </script>
 </body>
 </html>
