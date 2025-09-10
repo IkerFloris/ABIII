@@ -23,7 +23,7 @@
             
             <div class="image-container">
                 <img id="swan-hero-image"
-                     src="/assets/loading.jpg"  <!-- or any placeholder image -->
+                     src="/assets/loading.jpg"  
                      alt="Swans migrating in V-formation across the sky"
                      class="hero-image">
                 <p class="image-caption">
@@ -107,75 +107,5 @@
             </div>
         </div>
     </div>
-
-    <!-- THIS IS THE NEW PART THAT TRIES YOUR IMAGE SERVICES -->
-    <script>
-        async function tryLoadImage(url, sourceName, color) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => {
-                    // Immediately update the image and source when loaded
-                    document.getElementById('swan-hero-image').src = url;
-                    document.getElementById('image-source').innerHTML = 
-                        `<span style="color: ${color}; font-size: 0.8em;"> (${sourceName})</span>`;
-                    console.log(`Successfully loaded image from ${sourceName}`);
-                    resolve();
-                };
-                img.onerror = (error) => {
-                    console.log(`Failed to load image from ${sourceName}:`, error);
-                    reject(error);
-                };
-                img.src = url;
-            });
-        }
-        
-        async function loadBestImage() {
-            // Show loading state immediately
-            document.getElementById('swan-hero-image').style.opacity = '0.5'; // dim the current image
-            document.getElementById('image-source').innerHTML = 
-                '<span style="color: #9E9E9E; font-size: 0.8em;"> (Loading...)</span>';
-        
-            const imagePath = '/assets/flying-swans.jpg'; // Adjust this path to match your image service
-            const services = [
-                {
-                    url: `http://image-service.swan-prod.local${imagePath}`,
-                    name: '📡 PROD Service',
-                    color: '#FF9800'
-                },
-                {
-                    url: `http://image-service.swan-dev.local${imagePath}`,
-                    name: '📡 DEV Service',
-                    color: '#2196F3'
-                }
-            ];
-        
-            let loaded = false;
-        
-            // Try each service in sequence until one works
-            for (const service of services) {
-                try {
-                    console.log(`Attempting to load from ${service.name}...`);
-                    await tryLoadImage(service.url, service.name, service.color);
-                    loaded = true;
-                    document.getElementById('swan-hero-image').style.opacity = '1';
-                    break; // Exit once successful
-                } catch (error) {
-                    console.log(`Failed to load from ${service.name}`);
-                }
-            }
-        
-            // If all services fail, use local asset
-            if (!loaded) {
-                console.log('All services failed, using local asset');
-                document.getElementById('swan-hero-image').src = '/assets/flying-swans.jpg';
-                document.getElementById('swan-hero-image').style.opacity = '1';
-                document.getElementById('image-source').innerHTML = 
-                    '<span style="color: #9E9E9E; font-size: 0.8em;"> (Local Asset)</span>';
-            }
-        }
-        
-        // Start loading immediately when DOM is ready
-        document.addEventListener('DOMContentLoaded', loadBestImage);
-    </script>
 </body>
 </html>
