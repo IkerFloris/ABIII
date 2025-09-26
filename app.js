@@ -26,14 +26,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Session middleware
 app.use(session({
+    name: 'myapp.sid',
     secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // Disable secure cookies behind load balancer
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        sameSite: 'lax' // Better compatibility
+        path: '/',                        // Set cookie path
+        secure: true,                     // Ensure HTTPS-only transmission
+        httpOnly: true,                   // Prevent XSS attacks
+        maxAge: 24 * 60 * 60 * 1000,     // Set expiration (24 hours)
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // Alternative expiration setting
+        sameSite: 'strict'                // Additional CSRF protection
     }
 }));
 
@@ -47,7 +50,7 @@ async function initializeClient() {
         const userPoolId = process.env.COGNITO_USER_POOL_ID || 'eu-north-1_UTMwKW3gu';
         const clientId = process.env.COGNITO_CLIENT_ID || 'ur6bklnund2slc43r9cieqvvm';
         const clientSecret = process.env.COGNITO_CLIENT_SECRET || 'fokl9b0euuo0rnbs70ut6od4ql7g36c701121pdfhslpntlaovn';
-        const redirectUri = process.env.REDIRECT_URI || ' http://Hello-world-load-balancer-1675728879.eu-north-1.elb.amazonaws.com/callback';
+        const redirectUri = process.env.REDIRECT_URI || ' https://Hello-world-load-balancer-1675728879.eu-north-1.elb.amazonaws.com/callback';
 
         const issuer = await Issuer.discover(`https://cognito-idp.${cognitoRegion}.amazonaws.com/${userPoolId}`);
 
